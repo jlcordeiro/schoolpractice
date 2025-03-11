@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartoony Analog Clock</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #ffcccb, #ffeb99);
+            font-family: 'Comic Sans MS', cursive;
+        }
+        canvas {
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 40%, #ffcccb 80%);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        #timeDisplay {
+            font-size: 30px;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #ff4081;
+            text-shadow: 2px 2px #ff99cc;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="clockCanvas" width="400" height="400"></canvas>
+    <div id="timeDisplay">Clica para mostrar a solução!</div>
+
+    <script>
+        const canvas = document.getElementById("clockCanvas");
+        const ctx = canvas.getContext("2d");
+        const timeDisplay = document.getElementById("timeDisplay");
+
+        let currentHour, currentMinute;
+        let waitingForInput = true;
+
+        function randomTime() {
+            currentHour = Math.floor(Math.random() * 12) + 1;
+            currentMinute = Math.floor(Math.random() * 60);
+        }
+
+        function timeToAngles(hour, minute) {
+            let minuteAngle = minute * 6;
+            let hourAngle = (hour % 12) * 30 + (minute / 2);
+            return { hourAngle, minuteAngle };
+        }
+
+        function drawClock() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            ctx.arc(200, 200, 150, 0, 2 * Math.PI);
+            ctx.fillStyle = "#fff";
+            ctx.fill();
+            ctx.strokeStyle = "#ff4081";
+            ctx.lineWidth = 8;
+            ctx.stroke();
+
+            ctx.font = "24px 'Comic Sans MS'";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            for (let i = 1; i <= 12; i++) {
+                let angle = (i * 30 - 90) * (Math.PI / 180);
+                let x = 200 + Math.cos(angle) * 120;
+                let y = 200 + Math.sin(angle) * 120;
+                ctx.fillStyle = "#ff4081";
+                ctx.fillText(i, x, y);
+            }
+
+            let { hourAngle, minuteAngle } = timeToAngles(currentHour, currentMinute);
+            drawHand(minuteAngle, 100, 6, "#ff99cc");
+            drawHand(hourAngle, 70, 8, "#ff4081");
+        }
+
+        function drawHand(angle, length, width, color) {
+            let radian = (angle - 90) * (Math.PI / 180);
+            let x = 200 + Math.cos(radian) * length;
+            let y = 200 + Math.sin(radian) * length;
+
+            ctx.beginPath();
+            ctx.moveTo(200, 200);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = "round";
+            ctx.stroke();
+        }
+
+        function showTime() {
+            timeDisplay.textContent = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+        }
+
+        function handleClick() {
+            if (waitingForInput) {
+                showTime();
+                waitingForInput = false;
+            } else {
+                randomTime();
+                drawClock();
+                timeDisplay.textContent = "Clica para mostrar a solução!";
+                waitingForInput = true;
+            }
+        }
+
+        randomTime();
+        drawClock();
+        document.body.addEventListener("click", handleClick);
+    </script>
+
+</body>
+</html>
